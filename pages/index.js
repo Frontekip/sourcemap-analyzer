@@ -12,6 +12,8 @@ const Home = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState({ android: false, ios: false });
+  const [isLoading, setIsLoading] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
 
   const androidCommand =
     "react-native bundle --platform android --dev false --entry-file index.js --bundle-output ./android/app/src/main/assets/index.android.bundle --sourcemap-output ./android/app/src/main/assets/index.android.bundle.map";
@@ -39,6 +41,7 @@ const Home = () => {
     formData.append("column", column);
 
     try {
+      setIsLoading(true);
       const response = await fetch("/api/analyze", {
         method: "POST",
         body: formData,
@@ -49,8 +52,11 @@ const Home = () => {
 
       setResult(data);
       setError(null);
+      setAnalysisResult(data);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -166,8 +172,15 @@ const Home = () => {
             variant="primary"
             size="lg"
             className="w-100 shadow-sm"
+            disabled={isLoading}
           >
-            Analyze
+            {isLoading ? (
+              <div className="loading-spinner">
+                <span>Analyzing...</span>
+              </div>
+            ) : (
+              'Analyze'
+            )}
           </Button>
         </Form>
       </div>
@@ -180,12 +193,12 @@ const Home = () => {
         </Alert>
       )}
 
-      {result && (
+      {analysisResult && !isLoading && (
         <div className="mt-4 bg-white p-4 rounded shadow-sm">
           <h4 className="border-bottom pb-3 mb-4">Analysis Result</h4>
-          <div className="bg-light p-3 rounded shadow-sm">
+          <div className="bg-dark p-3 rounded shadow-sm">
             <ReactJson
-              src={result}
+              src={analysisResult}
               theme="monokai"
               displayDataTypes={false}
               name={false}
@@ -198,6 +211,43 @@ const Home = () => {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .loading-spinner {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .loading-spinner::before {
+          content: '';
+          width: 16px;
+          height: 16px;
+          border: 2px solid #f3f3f3;
+          border-top: 2px solid #3498db;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .analyze-button {
+          padding: 10px 20px;
+          background-color: #3498db;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+
+        .analyze-button:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
+      `}</style>
     </Container>
   );
 };

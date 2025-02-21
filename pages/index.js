@@ -67,6 +67,17 @@ const Home = () => {
         <p className="lead text-muted">
           Easily locate errors in your React Native application's source code
         </p>
+        <a
+          href="https://github.com/Frontekip/sourcemap-analyzer"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-decoration-none"
+        >
+          <small className="text-muted">
+            <i className="bi bi-github me-1"></i>
+            View on GitHub
+          </small>
+        </a>
       </div>
 
       <Row className="mb-4">
